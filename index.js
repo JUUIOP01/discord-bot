@@ -1,6 +1,5 @@
 import http from "http";
 import nacl from "tweetnacl";
-import fetch from "node-fetch";
 
 const PUBLIC_KEY = "ba889b582f6c1b74b0369916e8a44ad72817dcabcc2bd117a199e98ebb97578f";
 const TOKEN = process.env.TOKEN;
