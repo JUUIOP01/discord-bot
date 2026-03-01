@@ -11,19 +11,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-/*
-  ✅ Route GET pour éviter problème de vérification
-  (Render cold start fix)
-*/
+/* ❌ IMPORTANT : NE PAS mettre app.use(express.json()) */
+
 app.get("/", (req, res) => {
   res.status(200).send("Bot is alive 🚀");
 });
 
-/*
-  ⚠️ IMPORTANT
-  On utilise express.raw() pour que Discord
-  puisse vérifier la signature correctement
-*/
 app.post(
   "/",
   express.raw({ type: "application/json" }),
@@ -31,27 +24,19 @@ app.post(
   (req, res) => {
     const interaction = JSON.parse(req.body.toString());
 
-    // 🔵 Réponse au PING Discord
     if (interaction.type === InteractionType.PING) {
       return res.send({ type: InteractionResponseType.PONG });
     }
 
-    // 🟢 Slash command
-    if (interaction.type === InteractionType.APPLICATION_COMMAND) {
-      if (interaction.data.name === "buy") {
-        return res.send({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: "🛒 Achat effectué avec succès !",
-          },
-        });
-      }
-    }
-
-    return res.status(400).send("Unknown interaction");
+    return res.send({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: {
+        content: "Bot connecté ✅",
+      },
+    });
   }
 );
 
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
