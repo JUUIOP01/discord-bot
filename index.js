@@ -42,13 +42,40 @@ const server = http.createServer((req, res) => {
     }
 
     // Command response
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        type: 4,
-        data: { content: "Bot en ligne 🚀" }
-      })
-    );
+   // Command handling
+if (interaction.data?.name === "buy") {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  return res.end(
+    JSON.stringify({
+      type: 4,
+      data: {
+        embeds: [
+          {
+            title: "💎 Support the Project",
+            description: "Thank you for supporting the bot!\nClick the button below to proceed with your purchase.",
+            color: 0x00bfff,
+            footer: {
+              text: "Secure payment via PayPal"
+            }
+          }
+        ],
+        components: [
+          {
+            type: 1,
+            components: [
+              {
+                type: 2,
+                label: "Buy Now 💳",
+                style: 5,
+                url: "https://www.paypal.com/paypalme/Zbipktufaisa"
+              }
+            ]
+          }
+        ]
+      }
+    })
+  );
+}
   });
 });
 
