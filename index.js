@@ -1,7 +1,10 @@
 import http from "http";
 import nacl from "tweetnacl";
+import fetch from "node-fetch";
 
-const PUBLIC_KEY = "ba889b582f6c1b74b0369916e8a44ad72817dcabcc2bd117a199e98ebb97578f";
+const PUBLIC_KEY = "TA_PUBLIC_KEY_ICI";
+const TOKEN = process.env.TOKEN;
+const APP_ID = "1477710394524045372";
 const PORT = process.env.PORT || 3000;
 
 function verifySignature(signature, timestamp, body) {
@@ -10,6 +13,23 @@ function verifySignature(signature, timestamp, body) {
     Buffer.from(signature, "hex"),
     Buffer.from(PUBLIC_KEY, "hex")
   );
+}
+
+// 🔥 Enregistrer la commande AU DÉMARRAGE
+async function registerCommand() {
+  await fetch(`https://discord.com/api/v10/applications/${APP_ID}/commands`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bot ${TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: "buy",
+      description: "Support the project via PayPal"
+    })
+  });
+
+  console.log("Commande /buy enregistrée !");
 }
 
 const server = http.createServer((req, res) => {
@@ -35,50 +55,24 @@ const server = http.createServer((req, res) => {
 
     const interaction = JSON.parse(body);
 
-    // PING
     if (interaction.type === 1) {
       res.writeHead(200, { "Content-Type": "application/json" });
       return res.end(JSON.stringify({ type: 1 }));
     }
 
-    // /buy command
     if (interaction.data?.name === "buy") {
       res.writeHead(200, { "Content-Type": "application/json" });
-      return res.end(
-        JSON.stringify({
-          type: 4,
-          data: {
-            embeds: [
-              {
-                title: "💎 Support the Project",
-                description:
-                  "Thank you for supporting the bot!\nClick the button below to proceed with your purchase.",
-                color: 49151,
-                footer: {
-                  text: "Secure payment via PayPal"
-                }
-              }
-            ],
-            components: [
-              {
-                type: 1,
-                components: [
-                  {
-                    type: 2,
-                    label: "Buy Now 💳",
-                    style: 5,
-                    url: "https://www.paypal.com/paypalme/Zbipktufaisa"
-                  }
-                ]
-              }
-            ]
-          }
-        })
-      );
+      return res.end(JSON.stringify({
+        type: 4,
+        data: {
+          content: "💎 Merci pour ton soutien !",
+        }
+      }));
     }
   });
 });
 
+registerCommand();
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
