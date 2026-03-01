@@ -2,7 +2,7 @@ import http from "http";
 import nacl from "tweetnacl";
 import fetch from "node-fetch";
 
-const PUBLIC_KEY = "TA_PUBLIC_KEY_ICI";
+const PUBLIC_KEY = "ba889b582f6c1b74b0369916e8a44ad72817dcabcc2bd117a199e98ebb97578f";
 const TOKEN = process.env.TOKEN;
 const APP_ID = "1477710394524045372";
 const PORT = process.env.PORT || 3000;
