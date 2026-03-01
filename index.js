@@ -9,9 +9,21 @@ import {
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
-// ⚠️ IMPORTANT : on utilise express.raw() ici
+/*
+  ✅ Route GET pour éviter problème de vérification
+  (Render cold start fix)
+*/
+app.get("/", (req, res) => {
+  res.status(200).send("Bot is alive 🚀");
+});
+
+/*
+  ⚠️ IMPORTANT
+  On utilise express.raw() pour que Discord
+  puisse vérifier la signature correctement
+*/
 app.post(
   "/",
   express.raw({ type: "application/json" }),
@@ -19,12 +31,12 @@ app.post(
   (req, res) => {
     const interaction = JSON.parse(req.body.toString());
 
-    // Ping Discord
+    // 🔵 Réponse au PING Discord
     if (interaction.type === InteractionType.PING) {
       return res.send({ type: InteractionResponseType.PONG });
     }
 
-    // Slash command
+    // 🟢 Slash command
     if (interaction.type === InteractionType.APPLICATION_COMMAND) {
       if (interaction.data.name === "buy") {
         return res.send({
