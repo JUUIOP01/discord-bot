@@ -1,102 +1,48 @@
-import http from "http";
-import nacl from "tweetnacl";
+import express from "express";
+import dotenv from "dotenv";
+import {
+  InteractionType,
+  InteractionResponseType,
+  verifyKeyMiddleware,
+} from "discord-interactions";
 
-const PUBLIC_KEY = "ba889b582f6c1b74b0369916e8a44ad72817dcabcc2bd117a199e98ebb97578f"; 
-const TOKEN = process.env.TOKEN; 
-const APP_ID = "1477710394524045372";
-const GUILD_ID = "1477308804973596844";
+dotenv.config();
+
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-/* =========================
-   Vérification Discord
-========================= */
-function verifySignature(signature, timestamp, body) {
-  return nacl.sign.detached.verify(
-    Buffer.from(timestamp + body),
-    Buffer.from(signature, "hex"),
-    Buffer.from(PUBLIC_KEY, "hex")
-  );
-}
+// ⚠️ Vérification signature Discord
+app.use(
+  "/",
+  express.json(),
+  verifyKeyMiddleware(process.env.PUBLIC_KEY)
+);
 
-/* =========================
-   Enregistrer la commande
-========================= */
-async function registerCommand() {
-  const response = await fetch(
-    `https://discord.com/api/v10/applications/${APP_ID}/guilds/${GUILD_ID}/commands`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bot ${TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: "buy",
-        description: "Support the project via PayPal",
-      }),
-    }
-  );
+// Route principale (Discord Interactions)
+app.post("/", async (req, res) => {
+  const { type, data } = req.body;
 
-  if (!response.ok) {
-    const text = await response.text();
-    console.log("Erreur Discord:", text);
-    return;
+  // Discord Ping
+  if (type === InteractionType.PING) {
+    return res.send({ type: InteractionResponseType.PONG });
   }
 
-  console.log("Commande /buy enregistrée !");
-}
-
-/* =========================
-   Serveur HTTP
-========================= */
-const server = http.createServer((req, res) => {
-  if (req.method !== "POST") {
-    res.writeHead(200);
-    return res.end("Bot is running");
+  // Slash command
+  if (type === InteractionType.APPLICATION_COMMAND) {
+    if (data.name === "buy") {
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: "🛒 Achat effectué avec succès !",
+        },
+      });
+    }
   }
 
-  let body = "";
-
-  req.on("data", (chunk) => {
-    body += chunk;
-  });
-
-  req.on("end", () => {
-    const signature = req.headers["x-signature-ed25519"];
-    const timestamp = req.headers["x-signature-timestamp"];
-
-    if (!verifySignature(signature, timestamp, body)) {
-      res.writeHead(401);
-      return res.end("Invalid signature");
-    }
-
-    const interaction = JSON.parse(body);
-
-    // Ping Discord
-    if (interaction.type === 1) {
-      res.writeHead(200, { "Content-Type": "application/json" });
-      return res.end(JSON.stringify({ type: 1 }));
-    }
-
-    // Commande /buy
-    if (interaction.data?.name === "buy") {
-      res.writeHead(200, { "Content-Type": "application/json" });
-      return res.end(
-        JSON.stringify({
-          type: 4,
-          data: {
-            content: "💎 Merci pour ton soutien !",
-          },
-        })
-      );
-    }
-  });
+  return res.status(400).send("Unknown interaction");
 });
 
-/* =========================
-   Démarrage
-========================= */
-server.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`);
-  await registerCommand();
+// Démarrage serveur
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
