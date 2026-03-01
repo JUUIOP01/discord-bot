@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-const APP_ID = "TON_APPLICATION_ID";
+const APP_ID = "1477710394524045372";
 const TOKEN = process.env.TOKEN;
 
 const command = {
