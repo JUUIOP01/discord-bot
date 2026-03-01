@@ -4,6 +4,7 @@ import nacl from "tweetnacl";
 const PUBLIC_KEY = "ba889b582f6c1b74b0369916e8a44ad72817dcabcc2bd117a199e98ebb97578f";
 const TOKEN = process.env.TOKEN;
 const APP_ID = "1477710394524045372";
+const GUILD_ID = "1477308804973596844";
 const PORT = process.env.PORT || 3000;
 
 function verifySignature(signature, timestamp, body) {
@@ -14,21 +15,27 @@ function verifySignature(signature, timestamp, body) {
   );
 }
 
-// 🔥 Enregistrer la commande AU DÉMARRAGE
+// 🔥 Enregistrer la commande au démarrage (SYNC PROPRE)
 async function registerCommand() {
-  await fetch(`https://discord.com/api/v10/applications/${APP_ID}/guilds/1477308804973596844/commands`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bot ${TOKEN}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      name: "buy",
-      description: "Support the project via PayPal"
-    })
-  });
+  const response = await fetch(
+    `https://discord.com/api/v10/applications/${APP_ID}/guilds/${GUILD_ID}/commands`,
+    {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bot ${TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify([
+        {
+          name: "buy",
+          description: "Support the project via PayPal"
+        }
+      ])
+    }
+  );
 
-  console.log("Commande /buy enregistrée !");
+  const data = await response.json();
+  console.log("Réponse Discord:", data);
 }
 
 const server = http.createServer((req, res) => {
@@ -54,36 +61,27 @@ const server = http.createServer((req, res) => {
 
     const interaction = JSON.parse(body);
 
+    // Ping Discord
     if (interaction.type === 1) {
       res.writeHead(200, { "Content-Type": "application/json" });
       return res.end(JSON.stringify({ type: 1 }));
     }
 
+    // Commande /buy
     if (interaction.data?.name === "buy") {
       res.writeHead(200, { "Content-Type": "application/json" });
       return res.end(JSON.stringify({
         type: 4,
         data: {
-          content: "💎 Merci pour ton soutien !",
+          content: "💎 Merci pour ton soutien !"
         }
       }));
     }
   });
 });
-async function resetCommands() {
-  await fetch(`https://discord.com/api/v10/applications/${APP_ID}/guilds/1477308804973596844/commands`, {
-    method: "PUT",
-    headers: {
-      "Authorization": `Bot ${TOKEN}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify([])
-  });
 
-  console.log("Anciennes commandes supprimées !");
-}
-await resetCommands();
-await registerCommand();
-server.listen(PORT, () => {
+// Lancer serveur + enregistrer commande
+server.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
+  await registerCommand();
 });
