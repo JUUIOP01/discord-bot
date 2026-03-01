@@ -41,65 +41,44 @@ const server = http.createServer((req, res) => {
       return res.end(JSON.stringify({ type: 1 }));
     }
 
-    // Command response
-   // Command handling
-if (interaction.data?.name === "buy") {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  return res.end(
-    JSON.stringify({
-      type: 4,
-      data: {
-        embeds: [
-          {
-            title: "💎 Support the Project",
-            description: "Thank you for supporting the bot!\nClick the button below to proceed with your purchase.",
-            color: 0x00bfff,
-            footer: {
-              text: "Secure payment via PayPal"
-            }
-          }
-        ],
-        components: [
-          {
-            type: 1,
+    // /buy command
+    if (interaction.data?.name === "buy") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      return res.end(
+        JSON.stringify({
+          type: 4,
+          data: {
+            embeds: [
+              {
+                title: "💎 Support the Project",
+                description:
+                  "Thank you for supporting the bot!\nClick the button below to proceed with your purchase.",
+                color: 49151,
+                footer: {
+                  text: "Secure payment via PayPal"
+                }
+              }
+            ],
             components: [
               {
-                type: 2,
-                label: "Buy Now 💳",
-                style: 5,
-                url: "https://www.paypal.com/paypalme/Zbipktufaisa"
+                type: 1,
+                components: [
+                  {
+                    type: 2,
+                    label: "Buy Now 💳",
+                    style: 5,
+                    url: "https://www.paypal.com/paypalme/Zbipktufaisa"
+                  }
+                ]
               }
             ]
           }
-        ]
-      }
-    })
-  );
-}
+        })
+      );
+    }
   });
 });
-import fetch from "node-fetch";
- {
-  await fetch(
-    `https://discord.com/api/v10/applications/${APP_ID}/guilds/${GUILD_ID}/commands`,
-    {
-      method: "PUT",
-      headers: {
-        "Authorization": `Bot ${TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify([
-        {
-          name: "buy",
-          description: "Support the project via PayPal"
-        }
-      ])
-    }
-  );
-  console.log("Commande /buy enregistrée !");
-}
 
-registerCommand();
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
