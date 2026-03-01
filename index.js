@@ -1,12 +1,15 @@
 import http from "http";
 import nacl from "tweetnacl";
 
-const PUBLIC_KEY = "ba889b582f6c1b74b0369916e8a44ad72817dcabcc2bd117a199e98ebb97578f";
-const TOKEN = process.env.TOKEN;
+const PUBLIC_KEY = "ba889b582f6c1b74b0369916e8a44ad72817dcabcc2bd117a199e98ebb97578f"; 
+const TOKEN = process.env.TOKEN; 
 const APP_ID = "1477710394524045372";
 const GUILD_ID = "1477308804973596844";
 const PORT = process.env.PORT || 3000;
 
+/* =========================
+   Vérification Discord
+========================= */
 function verifySignature(signature, timestamp, body) {
   return nacl.sign.detached.verify(
     Buffer.from(timestamp + body),
@@ -15,29 +18,37 @@ function verifySignature(signature, timestamp, body) {
   );
 }
 
-// 🔥 Enregistrer la commande au démarrage (SYNC PROPRE)
+/* =========================
+   Enregistrer la commande
+========================= */
 async function registerCommand() {
   const response = await fetch(
     `https://discord.com/api/v10/applications/${APP_ID}/guilds/${GUILD_ID}/commands`,
     {
-      method: "PUT",
+      method: "POST",
       headers: {
-        "Authorization": `Bot ${TOKEN}`,
-        "Content-Type": "application/json"
+        Authorization: `Bot ${TOKEN}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify([
-        {
-          name: "buy",
-          description: "Support the project via PayPal"
-        }
-      ])
+      body: JSON.stringify({
+        name: "buy",
+        description: "Support the project via PayPal",
+      }),
     }
   );
 
-  const data = await response.json();
-  console.log("Réponse Discord:", data);
+  if (!response.ok) {
+    const text = await response.text();
+    console.log("Erreur Discord:", text);
+    return;
+  }
+
+  console.log("Commande /buy enregistrée !");
 }
 
+/* =========================
+   Serveur HTTP
+========================= */
 const server = http.createServer((req, res) => {
   if (req.method !== "POST") {
     res.writeHead(200);
@@ -46,7 +57,7 @@ const server = http.createServer((req, res) => {
 
   let body = "";
 
-  req.on("data", chunk => {
+  req.on("data", (chunk) => {
     body += chunk;
   });
 
@@ -70,17 +81,21 @@ const server = http.createServer((req, res) => {
     // Commande /buy
     if (interaction.data?.name === "buy") {
       res.writeHead(200, { "Content-Type": "application/json" });
-      return res.end(JSON.stringify({
-        type: 4,
-        data: {
-          content: "💎 Merci pour ton soutien !"
-        }
-      }));
+      return res.end(
+        JSON.stringify({
+          type: 4,
+          data: {
+            content: "💎 Merci pour ton soutien !",
+          },
+        })
+      );
     }
   });
 });
 
-// Lancer serveur + enregistrer commande
+/* =========================
+   Démarrage
+========================= */
 server.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   await registerCommand();
