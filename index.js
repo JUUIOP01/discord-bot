@@ -11,38 +11,35 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ⚠️ Vérification signature Discord
-app.use(
+// ⚠️ IMPORTANT : on utilise express.raw() ici
+app.post(
   "/",
-  express.json(),
-  verifyKeyMiddleware(process.env.PUBLIC_KEY)
+  express.raw({ type: "application/json" }),
+  verifyKeyMiddleware(process.env.PUBLIC_KEY),
+  (req, res) => {
+    const interaction = JSON.parse(req.body.toString());
+
+    // Ping Discord
+    if (interaction.type === InteractionType.PING) {
+      return res.send({ type: InteractionResponseType.PONG });
+    }
+
+    // Slash command
+    if (interaction.type === InteractionType.APPLICATION_COMMAND) {
+      if (interaction.data.name === "buy") {
+        return res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: "🛒 Achat effectué avec succès !",
+          },
+        });
+      }
+    }
+
+    return res.status(400).send("Unknown interaction");
+  }
 );
 
-// Route principale (Discord Interactions)
-app.post("/", async (req, res) => {
-  const { type, data } = req.body;
-
-  // Discord Ping
-  if (type === InteractionType.PING) {
-    return res.send({ type: InteractionResponseType.PONG });
-  }
-
-  // Slash command
-  if (type === InteractionType.APPLICATION_COMMAND) {
-    if (data.name === "buy") {
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: "🛒 Achat effectué avec succès !",
-        },
-      });
-    }
-  }
-
-  return res.status(400).send("Unknown interaction");
-});
-
-// Démarrage serveur
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
