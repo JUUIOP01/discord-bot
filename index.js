@@ -78,7 +78,33 @@ if (interaction.data?.name === "buy") {
 }
   });
 });
+import fetch from "node-fetch";
 
+const APP_ID = "1477710394524045372";
+const GUILD_ID = "1477308804973596844";
+const TOKEN = process.env.TOKEN;
+
+async function registerCommand() {
+  await fetch(
+    `https://discord.com/api/v10/applications/${APP_ID}/guilds/${GUILD_ID}/commands`,
+    {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bot ${TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify([
+        {
+          name: "buy",
+          description: "Support the project via PayPal"
+        }
+      ])
+    }
+  );
+  console.log("Commande /buy enregistrée !");
+}
+
+registerCommand();
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
