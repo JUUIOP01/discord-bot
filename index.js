@@ -16,7 +16,7 @@ function verifySignature(signature, timestamp, body) {
 
 // 🔥 Enregistrer la commande AU DÉMARRAGE
 async function registerCommand() {
-  await fetch(`https://discord.com/api/v10/applications/${APP_ID}/commands`, {
+  await fetch(`https://discord.com/api/v10/applications/${APP_ID}/guilds/ID_DE_TON_SERVEUR/commands`, {
     method: "POST",
     headers: {
       "Authorization": `Bot ${TOKEN}`,
