@@ -12,8 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 /*
-  🔎 LOGGER GLOBAL
-  Permet de voir si Discord envoie bien une requête
+  🔎 Logger global pour voir toutes les requêtes entrantes
 */
 app.use((req, res, next) => {
   console.log("Incoming request:", req.method, req.url);
@@ -21,15 +20,22 @@ app.use((req, res, next) => {
 });
 
 /*
-  Route GET simple pour test navigateur
+  Route GET pour test navigateur
 */
 app.get("/", (req, res) => {
   res.status(200).send("Bot is alive 🚀");
 });
 
 /*
-  Route POST pour Discord
-  ⚠️ IMPORTANT : express.raw obligatoire
+  Route HEAD (important pour certains checks externes)
+*/
+app.head("/", (req, res) => {
+  res.sendStatus(200);
+});
+
+/*
+  Route POST pour Discord Interactions
+  ⚠️ express.raw obligatoire
 */
 app.post(
   "/",
