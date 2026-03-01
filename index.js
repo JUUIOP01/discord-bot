@@ -79,12 +79,7 @@ if (interaction.data?.name === "buy") {
   });
 });
 import fetch from "node-fetch";
-
-const APP_ID = "1477710394524045372";
-const GUILD_ID = "1477308804973596844";
-const TOKEN = process.env.TOKEN;
-
-async function registerCommand() {
+ {
   await fetch(
     `https://discord.com/api/v10/applications/${APP_ID}/guilds/${GUILD_ID}/commands`,
     {
