@@ -70,8 +70,20 @@ const server = http.createServer((req, res) => {
     }
   });
 });
+async function resetCommands() {
+  await fetch(`https://discord.com/api/v10/applications/${APP_ID}/guilds/1477308804973596844/commands`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bot ${TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify([])
+  });
 
-registerCommand();
+  console.log("Anciennes commandes supprimées !");
+}
+await resetCommands();
+await registerCommand();
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
