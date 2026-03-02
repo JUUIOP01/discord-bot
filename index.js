@@ -34,38 +34,45 @@ app.post(
       const { name } = interaction.data;
 
       if (name === "buy") {
-        return res.json({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            embeds: [
-              {
-                title: "🛒 Boutique [+] Abdel",
-                description: "Merci de votre intérêt ! Cliquez sur le bouton ci-dessous pour effectuer votre paiement via **PayPal** en toute sécurité. 💳\n\n> Après votre paiement, contactez un administrateur pour recevoir votre produit.",
-                color: 0x5865F2,
-                thumbnail: {
-                  url: "https://cdn-icons-png.flaticon.com/512/174/174861.png",
-                },
-                footer: {
-                  text: "[+] Abdel • Boutique officielle",
-                },
-                timestamp: new Date().toISOString(),
-              },
-            ],
-            components: [
-              {
-                type: 1,
-                components: [
-                  {
-                    type: 2,
-                    style: 5,
-                    label: "💳 Payer via PayPal",
-                    url: "https://www.paypal.com/paypalme/Zbipktufaisa",
-                  },
-                ],
-              },
-            ],
-          },
+        // Répond immédiatement pour éviter le timeout Discord
+        res.json({
+          type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
         });
+
+        // Puis envoie le vrai message
+        setTimeout(async () => {
+          await fetch(`https://discord.com/api/v10/webhooks/${process.env.APP_ID}/${interaction.token}/messages/@original`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              embeds: [
+                {
+                  title: "🛒 Boutique [+] Abdel",
+                  description: "Merci de votre intérêt ! Cliquez sur le bouton ci-dessous pour effectuer votre paiement via **PayPal** en toute sécurité. 💳\n\n> Après votre paiement, contactez un administrateur pour recevoir votre produit.",
+                  color: 0x5865F2,
+                  thumbnail: { url: "https://cdn-icons-png.flaticon.com/512/174/174861.png" },
+                  footer: { text: "[+] Abdel • Boutique officielle" },
+                  timestamp: new Date().toISOString(),
+                },
+              ],
+              components: [
+                {
+                  type: 1,
+                  components: [
+                    {
+                      type: 2,
+                      style: 5,
+                      label: "💳 Payer via PayPal",
+                      url: "https://www.paypal.com/paypalme/Zbipktufaisa",
+                    },
+                  ],
+                },
+              ],
+            }),
+          });
+        }, 100);
+
+        return;
       }
 
       return res.json({
