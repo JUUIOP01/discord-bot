@@ -7,7 +7,7 @@ import {
 } from "discord-interactions";
 
 dotenv.config();
-
+console.log("PUBLIC_KEY:", process.env.PUBLIC_KEY);
 const app = express();
 const PORT = process.env.PORT || 10000;
 
